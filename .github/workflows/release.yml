@@ -33,8 +33,22 @@ jobs:
       - name: Run unit tests
         run: dotnet test tests/FitnessQuest.Tests/FitnessQuest.Tests.csproj -c Release
 
+      - name: Decode signing keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$GITHUB_WORKSPACE/fitnessquest.keystore"
+
       - name: Publish Android APK (Release, signed)
-        run: dotnet publish FitnessQuest.csproj -f net10.0-android -c Release -p:AndroidPackageFormat=apk
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          dotnet publish FitnessQuest.csproj -f net10.0-android -c Release \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="$GITHUB_WORKSPACE/fitnessquest.keystore" \
+            -p:AndroidSigningStorePass="$KS_PASS" \
+            -p:AndroidSigningKeyAlias="$KEY_ALIAS" \
+            -p:AndroidSigningKeyPass="$KEY_PASS"
 
       - name: Stage APK with version name
         run: cp bin/Release/net10.0-android/publish/com.obos.fitnessquest-Signed.apk "FitnessQuest-${{ github.ref_name }}.apk"
