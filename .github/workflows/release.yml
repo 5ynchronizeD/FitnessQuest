@@ -1,0 +1,47 @@
+name: Release
+
+# Körs när du pushar en tagg som börjar med "v", t.ex. v1.7
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # behövs för att skapa en GitHub Release
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Run unit tests
+        run: dotnet test tests/FitnessQuest.Tests/FitnessQuest.Tests.csproj -c Release
+
+      - name: Publish Android APK (Release, signed)
+        run: dotnet publish FitnessQuest.csproj -f net10.0-android -c Release -p:AndroidPackageFormat=apk
+
+      - name: Stage APK with version name
+        run: cp bin/Release/net10.0-android/publish/com.obos.fitnessquest-Signed.apk "FitnessQuest-${{ github.ref_name }}.apk"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "FitnessQuest ${{ github.ref_name }}"
+          generate_release_notes: true
+          files: "FitnessQuest-${{ github.ref_name }}.apk"

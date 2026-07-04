@@ -7,9 +7,15 @@ Gamifierad fitness-app för Android (.NET 10 MAUI). Se `README.md` för funktion
 **Vid varje ny version ska följande alltid göras:**
 
 1. **Bumpa versionen** i `FitnessQuest.csproj` (`ApplicationDisplayVersion` + `ApplicationVersion`). Versionen visas på startsidan.
-2. **Bygg en Release-APK** (se bygg-kommando nedan).
-3. **Kopiera APK:n till Google Drive** (`D:`): `D:\Min enhet\FitnessQuest\FitnessQuest-<version>.apk`.
-4. **Committa och pusha till GitHub** (`origin` = https://github.com/5ynchronizeD/FitnessQuest.git, branch `main`).
+2. **Committa och pusha** till GitHub (`origin` = https://github.com/5ynchronizeD/FitnessQuest.git, branch `main`).
+3. **Skapa och pusha en tagg** `vX.Y` (matchande versionen). Detta triggar GitHub Actions (`.github/workflows/release.yml`) som kör tester, bygger en Release-APK och **skapar en GitHub Release automatiskt** med APK:n bifogad.
+   ```bash
+   git tag -a v1.7 -m "FitnessQuest v1.7"
+   git push origin v1.7
+   ```
+4. **Kopiera APK:n till Google Drive** (`D:`): `D:\Min enhet\FitnessQuest\FitnessQuest-<version>.apk` (lokal distribution — CI gör inte detta). Alternativt laddas APK:n ner från GitHub-releasen.
+
+> CI bygger själva releasen; det lokala bygg-kommandot nedan behövs bara för att testa/verifiera på emulator innan du taggar.
 
 ## Bygg-kommando
 
