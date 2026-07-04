@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.AddFoodPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
+    x:DataType="vm:AddFoodViewModel"
+    Title="Logga mat"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,16" Spacing="16">
+
+            <!-- Food header -->
+            <Border Style="{StaticResource Card}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Border WidthRequest="60" HeightRequest="60" BackgroundColor="{StaticResource SurfaceAlt}"
+                            IsVisible="{Binding ImageUrl, Converter={StaticResource IsNull}}">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                        <Label Text="🍽️" FontSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Image Source="{Binding ImageUrl}" WidthRequest="60" HeightRequest="60" Aspect="AspectFill"
+                           IsVisible="{Binding ImageUrl, Converter={StaticResource IsNotNull}}" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="{Binding FoodName}" TextColor="{StaticResource TextPrimary}"
+                               FontSize="17" FontAttributes="Bold" />
+                        <Label Text="{Binding Per100Label}" Style="{StaticResource Muted}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Amount -->
+            <Label Text="Mängd (gram)" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Button Text="−50" Command="{Binding AdjustGramsCommand}" CommandParameter="-50"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" CornerRadius="12" />
+                        <Entry Grid.Column="1" Text="{Binding Grams}" Keyboard="Numeric"
+                               HorizontalTextAlignment="Center" FontSize="24" FontAttributes="Bold"
+                               Style="{StaticResource FieldEntry}" />
+                        <Button Grid.Column="2" Text="+50" Command="{Binding AdjustGramsCommand}" CommandParameter="50"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" CornerRadius="12" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                        <Button Text="10" Command="{Binding AdjustGramsCommand}" CommandParameter="10"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="10" FontSize="13" />
+                        <Button Grid.Column="1" Text="25" Command="{Binding AdjustGramsCommand}" CommandParameter="25"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="10" FontSize="13" />
+                        <Button Grid.Column="2" Text="100" Command="{Binding AdjustGramsCommand}" CommandParameter="100"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="10" FontSize="13" />
+                        <Button Grid.Column="3" Text="−10" Command="{Binding AdjustGramsCommand}" CommandParameter="-10"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="10" FontSize="13" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Live preview -->
+            <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource SurfaceAlt}">
+                <Grid ColumnDefinitions="*,*,*,*">
+                    <VerticalStackLayout Grid.Column="0" Spacing="0" HorizontalOptions="Center">
+                        <Label Text="{Binding PreviewKcal, StringFormat='{0:0}'}" TextColor="{StaticResource AccentGreen}"
+                               FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="kcal" Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="0" HorizontalOptions="Center">
+                        <Label Text="{Binding PreviewProtein, StringFormat='{0:0}'}" TextColor="{StaticResource ProteinColor}"
+                               FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="protein" Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="0" HorizontalOptions="Center">
+                        <Label Text="{Binding PreviewCarbs, StringFormat='{0:0}'}" TextColor="{StaticResource CarbsColor}"
+                               FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="kolhydr." Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="3" Spacing="0" HorizontalOptions="Center">
+                        <Label Text="{Binding PreviewFat, StringFormat='{0:0}'}" TextColor="{StaticResource FatColor}"
+                               FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="fett" Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Meal chips -->
+            <Label Text="Måltid" Style="{StaticResource SectionTitle}" />
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="🌅 Frukost" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Breakfast}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Breakfast}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="🍽️ Lunch" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Lunch}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Lunch}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="2" Text="🌙 Middag" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Dinner}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Dinner}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="3" Text="🍎 Snack" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Snack}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Snack}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <!-- Favourite toggle -->
+            <Button Text="⭐ Markera som favorit" Command="{Binding ToggleFavoriteCommand}"
+                    BackgroundColor="Transparent" TextColor="{StaticResource XpGold}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsFavorite}" Value="True">
+                        <Setter Property="Text" Value="⭐ Favorit ✓" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <!-- Actions -->
+            <Button Text="{Binding SaveLabel}" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" />
+            <Button Text="Avbryt" Command="{Binding CancelCommand}" BackgroundColor="Transparent"
+                    TextColor="{StaticResource TextMuted}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.StatisticsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    x:DataType="vm:StatisticsViewModel"
+    Title="Statistik"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="16">
+
+            <!-- Nutrition -->
+            <Label Text="Kalorier · senaste 7 dagarna" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Spacing="-2">
+                            <Label Text="{Binding AvgKcal, StringFormat='{0:0}'}" TextColor="{StaticResource AccentGreen}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="snitt kcal/dag" Style="{StaticResource Muted}" FontSize="11" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="-2">
+                            <Label Text="{Binding AvgProtein, StringFormat='{0:0} g'}" TextColor="{StaticResource ProteinColor}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="snitt protein/dag" Style="{StaticResource Muted}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <GraphicsView x:Name="CalorieChart" HeightRequest="160" />
+                    <Label Text="- - -  Mål" Style="{StaticResource Muted}" FontSize="10" HorizontalOptions="End" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Training -->
+            <Label Text="Träningsvolym · senaste 8 veckorna" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Spacing="-2">
+                            <Label Text="{Binding AvgWeeklyVolume, StringFormat='{0:0} kg'}" TextColor="{StaticResource AccentPrimary}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="snitt volym/vecka" Style="{StaticResource Muted}" FontSize="11" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="-2">
+                            <Label Text="{Binding WorkoutsPerWeek, StringFormat='{0:0.0}'}" TextColor="{StaticResource TextPrimary}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="pass/vecka" Style="{StaticResource Muted}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <GraphicsView x:Name="VolumeChart" HeightRequest="160" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Cardio -->
+            <Label Text="Cardio-distans · senaste 14 dagarna" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="{Binding CardioTotal14, StringFormat='{0:0.0} km'}" TextColor="{StaticResource AccentGreen}" FontSize="22" FontAttributes="Bold" />
+                        <Label Text="totalt senaste 14 dagarna" Style="{StaticResource Muted}" FontSize="11" />
+                    </VerticalStackLayout>
+                    <GraphicsView x:Name="CardioChart" HeightRequest="150" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Progression -->
+            <Label Text="Övningsprogression" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Picker Title="Välj övning" ItemsSource="{Binding ExerciseNames}"
+                            SelectedItem="{Binding SelectedExercise}"
+                            TextColor="{StaticResource TextPrimary}" TitleColor="{StaticResource TextMuted}"
+                            BackgroundColor="{StaticResource SurfaceAlt}" />
+                    <Label Text="Beräknat 1RM (kg) per träningsdag" Style="{StaticResource Muted}" FontSize="11" />
+                    <GraphicsView x:Name="ProgressionChart" HeightRequest="170" IsVisible="{Binding HasProgression}" />
+                    <Label Text="Ingen data ännu – logga pass med den här övningen." Style="{StaticResource Muted}"
+                           IsVisible="{Binding HasProgression, Converter={StaticResource InvertedBool}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

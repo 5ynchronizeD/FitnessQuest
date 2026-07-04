@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.WorkoutEditorPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    x:Name="Page"
+    x:DataType="vm:WorkoutEditorViewModel"
+    Title="Pass"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" BackgroundColor="{StaticResource Surface}" Padding="16,12" StrokeThickness="0">
+            <VerticalStackLayout Spacing="8">
+                <Entry Text="{Binding WorkoutName}" Placeholder="Passnamn" FontSize="18" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextMuted}" BackgroundColor="Transparent" />
+                <Grid ColumnDefinitions="*,*,*">
+                    <VerticalStackLayout Grid.Column="0" Spacing="-2">
+                        <Label Text="⏱ Tid" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding ElapsedLabel}" TextColor="{StaticResource AccentGreen}" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="-2">
+                        <Label Text="Volym" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding TotalVolume, StringFormat='{0:0} kg'}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="-2">
+                        <Label Text="Set" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding TotalSets}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Rest timer bar -->
+                <Border IsVisible="{Binding RestActive}" BackgroundColor="{StaticResource AccentPrimary}" Padding="12,8">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                        <Label Text="⏳ Vila" TextColor="White" VerticalOptions="Center" FontAttributes="Bold" />
+                        <Label Grid.Column="1" Text="{Binding RestLabel}" TextColor="White" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Button Grid.Column="2" Text="+15s" Command="{Binding AddRestCommand}" BackgroundColor="#33FFFFFF" TextColor="White" CornerRadius="10" Padding="8,0" HeightRequest="36" />
+                        <Button Grid.Column="3" Text="Hoppa" Command="{Binding SkipRestCommand}" BackgroundColor="#33FFFFFF" TextColor="White" CornerRadius="10" Padding="8,0" HeightRequest="36" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Exercises -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="12" Spacing="12">
+
+                <Label Text="Tryck ＋ för att lägga till en övning" Style="{StaticResource Muted}"
+                       HorizontalOptions="Center" Margin="0,20"
+                       IsVisible="{Binding HasBlocks, Converter={StaticResource InvertedBool}}" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Blocks}" Spacing="12">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ExerciseBlockViewModel">
+                            <Border Style="{StaticResource Card}" Padding="14,12">
+                                <VerticalStackLayout Spacing="8">
+
+                                    <!-- Exercise header -->
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="-2">
+                                            <Label Text="{Binding ExerciseName}" TextColor="{StaticResource AccentGreen}" FontSize="16" FontAttributes="Bold" />
+                                            <Label Text="{Binding EquipmentLabel}" Style="{StaticResource Muted}" FontSize="11" />
+                                            <Label Text="{Binding SupersetLabel}" TextColor="{StaticResource XpGold}" FontSize="11" IsVisible="{Binding IsSuperset}" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="🏋️" FontSize="14" BackgroundColor="Transparent" WidthRequest="40"
+                                                IsVisible="{Binding IsBarbell}" Command="{Binding PlateCalcCommand}" />
+                                        <Button Grid.Column="2" Text="🔗" FontSize="14" BackgroundColor="Transparent" WidthRequest="40"
+                                                Command="{Binding ToggleSupersetCommand}" />
+                                        <Button Grid.Column="3" Text="🗑" FontSize="14" BackgroundColor="Transparent" WidthRequest="40"
+                                                Command="{Binding RemoveCommand}" />
+                                    </Grid>
+
+                                    <!-- Rest control -->
+                                    <HorizontalStackLayout Spacing="8" HorizontalOptions="Start">
+                                        <Label Text="Vila:" Style="{StaticResource Muted}" VerticalOptions="Center" />
+                                        <Button Text="−" Command="{Binding DecreaseRestCommand}" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" WidthRequest="34" HeightRequest="32" CornerRadius="8" Padding="0" />
+                                        <Label Text="{Binding RestLabel}" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" WidthRequest="44" HorizontalTextAlignment="Center" />
+                                        <Button Text="+" Command="{Binding IncreaseRestCommand}" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" WidthRequest="34" HeightRequest="32" CornerRadius="8" Padding="0" />
+                                    </HorizontalStackLayout>
+
+                                    <!-- Sets header -->
+                                    <Grid ColumnDefinitions="36,*,64,56,40" ColumnSpacing="6">
+                                        <Label Text="Set" Style="{StaticResource Muted}" FontSize="11" />
+                                        <Label Grid.Column="1" Text="Förra" Style="{StaticResource Muted}" FontSize="11" />
+                                        <Label Grid.Column="2" Text="Kg" Style="{StaticResource Muted}" FontSize="11" HorizontalTextAlignment="Center" />
+                                        <Label Grid.Column="3" Text="Reps" Style="{StaticResource Muted}" FontSize="11" HorizontalTextAlignment="Center" />
+                                        <Label Grid.Column="4" Text="✓" Style="{StaticResource Muted}" FontSize="11" HorizontalTextAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Set rows -->
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sets}" Spacing="6">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:SetRowViewModel">
+                                                <Grid ColumnDefinitions="36,*,64,56,40" ColumnSpacing="6">
+                                                    <Button Grid.Column="0" Text="{Binding Badge}" Command="{Binding CycleTypeCommand}"
+                                                            BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}"
+                                                            FontSize="13" FontAttributes="Bold" WidthRequest="36" HeightRequest="40" CornerRadius="8" Padding="0" />
+                                                    <Label Grid.Column="1" Text="{Binding PreviousText}" Style="{StaticResource Muted}" VerticalOptions="Center" FontSize="12" />
+                                                    <Entry Grid.Column="2" Text="{Binding Weight}" Keyboard="Numeric" HorizontalTextAlignment="Center"
+                                                           BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" Placeholder="0" />
+                                                    <Entry Grid.Column="3" Text="{Binding Reps}" Keyboard="Numeric" HorizontalTextAlignment="Center"
+                                                           BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" Placeholder="0" />
+                                                    <CheckBox Grid.Column="4" IsChecked="{Binding IsCompleted}" Color="{StaticResource AccentGreen}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <Button Text="＋ Lägg till set" Command="{Binding AddSetCommand}"
+                                            BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}"
+                                            CornerRadius="10" HeightRequest="40" FontSize="13" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Button Text="＋ Lägg till övning" Command="{Binding AddExerciseCommand}"
+                        BackgroundColor="{StaticResource AccentPrimary}" TextColor="White" CornerRadius="16" HeightRequest="52" />
+
+                <BoxView HeightRequest="8" Color="Transparent" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Footer actions -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,2*" ColumnSpacing="10" Padding="12,10" BackgroundColor="{StaticResource Surface}">
+            <Button Grid.Column="0" Text="Avbryt" Command="{Binding CancelCommand}"
+                    BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="14" HeightRequest="50" />
+            <Button Grid.Column="1" Text="✅ Avsluta &amp; spara" Command="{Binding FinishCommand}" Style="{StaticResource GreenButton}" HeightRequest="50" />
+        </Grid>
+    </Grid>
+</ContentPage>

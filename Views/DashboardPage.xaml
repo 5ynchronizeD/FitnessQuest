@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    x:DataType="vm:DashboardViewModel"
+    Title="FitnessQuest"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="16">
+
+            <Label Text="{Binding Greeting}" Style="{StaticResource SectionTitle}" FontSize="20" />
+
+            <!-- Player / level card -->
+            <Border Style="{StaticResource Card}" Padding="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="{StaticResource AccentPrimary}" Offset="0.0" />
+                        <GradientStop Color="{StaticResource Tertiary}" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="18" RowDefinitions="Auto,Auto,Auto">
+
+                    <Border Grid.RowSpan="3" WidthRequest="76" HeightRequest="76"
+                            BackgroundColor="#33000000" VerticalOptions="Center">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="38" /></Border.StrokeShape>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="-4">
+                            <Label Text="{Binding Level}" TextColor="White" FontSize="34"
+                                   FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="NIVÅ" TextColor="White" FontSize="10"
+                                   HorizontalOptions="Center" Opacity="0.8" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Grid.Column="1" Text="{Binding Rank}" TextColor="White"
+                           FontSize="22" FontAttributes="Bold" />
+                    <ProgressBar Grid.Column="1" Grid.Row="1" Progress="{Binding LevelProgress}"
+                                 ProgressColor="{StaticResource XpGold}" Margin="0,6"
+                                 BackgroundColor="#33000000" />
+                    <Label Grid.Column="1" Grid.Row="2" Text="{Binding XpLabel}"
+                           TextColor="White" Opacity="0.9" FontSize="12" />
+                </Grid>
+            </Border>
+
+            <!-- Streak strip -->
+            <Border Style="{StaticResource Card}" Padding="16">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="🔥" FontSize="30" VerticalOptions="Center" />
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="-2">
+                            <Label Text="{Binding CurrentStreak, StringFormat='{0} dagar'}"
+                                   TextColor="{StaticResource StreakOrange}" FontSize="20" FontAttributes="Bold" />
+                            <Label Text="Nuvarande streak" Style="{StaticResource Muted}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                        <Label Text="🏆" FontSize="30" VerticalOptions="Center" />
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="-2">
+                            <Label Text="{Binding LongestStreak, StringFormat='{0} dagar'}"
+                                   TextColor="{StaticResource XpGold}" FontSize="20" FontAttributes="Bold" />
+                            <Label Text="Längsta streak" Style="{StaticResource Muted}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Quick actions -->
+            <Label Text="Logga snabbt" Style="{StaticResource SectionTitle}" />
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="10,16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoNutritionCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="🥗" FontSize="30" HorizontalOptions="Center" />
+                        <Label Text="Kost" HorizontalOptions="Center" TextColor="{StaticResource TextPrimary}" FontSize="13" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}" Padding="10,16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoGymCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="🏋️" FontSize="30" HorizontalOptions="Center" />
+                        <Label Text="Gym" HorizontalOptions="Center" TextColor="{StaticResource TextPrimary}" FontSize="13" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="10,16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoCardioCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="🏃" FontSize="30" HorizontalOptions="Center" />
+                        <Label Text="Cardio" HorizontalOptions="Center" TextColor="{StaticResource TextPrimary}" FontSize="13" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Nutrition today -->
+            <Label Text="Kost idag" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Kalorier" TextColor="{StaticResource TextPrimary}" FontSize="15" FontAttributes="Bold" />
+                        <Label Grid.Column="1" Text="{Binding CalorieLabel}" Style="{StaticResource Muted}" />
+                    </Grid>
+                    <ProgressBar Progress="{Binding CalorieProgress}" ProgressColor="{StaticResource AccentGreen}"
+                                 BackgroundColor="{StaticResource SurfaceAlt}" />
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,4,0,0">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{Binding Protein, StringFormat='{0:0} g'}" TextColor="{StaticResource ProteinColor}"
+                                   FontAttributes="Bold" HorizontalOptions="Center" />
+                            <ProgressBar Progress="{Binding ProteinProgress}" ProgressColor="{StaticResource ProteinColor}"
+                                         BackgroundColor="{StaticResource SurfaceAlt}" />
+                            <Label Text="Protein" Style="{StaticResource Muted}" HorizontalOptions="Center" FontSize="11" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{Binding Carbs, StringFormat='{0:0} g'}" TextColor="{StaticResource CarbsColor}"
+                                   FontAttributes="Bold" HorizontalOptions="Center" />
+                            <ProgressBar Progress="{Binding CarbsProgress}" ProgressColor="{StaticResource CarbsColor}"
+                                         BackgroundColor="{StaticResource SurfaceAlt}" />
+                            <Label Text="Kolhydrat" Style="{StaticResource Muted}" HorizontalOptions="Center" FontSize="11" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="{Binding Fat, StringFormat='{0:0} g'}" TextColor="{StaticResource FatColor}"
+                                   FontAttributes="Bold" HorizontalOptions="Center" />
+                            <ProgressBar Progress="{Binding FatProgress}" ProgressColor="{StaticResource FatColor}"
+                                         BackgroundColor="{StaticResource SurfaceAlt}" />
+                            <Label Text="Fett" Style="{StaticResource Muted}" HorizontalOptions="Center" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Training today -->
+            <Label Text="Träning idag" Style="{StaticResource SectionTitle}" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="🏋️ Gympass" Style="{StaticResource Muted}" />
+                        <Label Text="{Binding WorkoutsToday}" TextColor="{StaticResource AccentPrimary}"
+                               FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="🏃 Cardio" Style="{StaticResource Muted}" />
+                        <Label Text="{Binding CardioKmToday, StringFormat='{0:0.0} km'}"
+                               TextColor="{StaticResource AccentGreen}" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Achievements teaser -->
+            <Border Style="{StaticResource Card}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoAchievementsCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Label Text="🏅" FontSize="30" VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="-2">
+                        <Label Text="Bragder" TextColor="{StaticResource TextPrimary}" FontSize="16" FontAttributes="Bold" />
+                        <Label Text="{Binding UnlockedCount, StringFormat='{0} upplåsta'}" Style="{StaticResource Muted}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="28" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Label Text="{Binding AppVersion}" Style="{StaticResource Muted}" FontSize="11"
+                   HorizontalOptions="Center" Margin="0,10,0,4" />
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

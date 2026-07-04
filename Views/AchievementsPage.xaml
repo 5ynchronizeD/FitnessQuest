@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.AchievementsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
+    x:DataType="vm:AchievementsViewModel"
+    Title="Bragder"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="14">
+
+            <!-- Stats header -->
+            <Border Style="{StaticResource Card}" Padding="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="{StaticResource AccentPrimary}" Offset="0.0" />
+                        <GradientStop Color="{StaticResource Tertiary}" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="-2">
+                            <Label Text="{Binding Level}" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Nivå" TextColor="White" Opacity="0.8" FontSize="12" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="-2">
+                            <Label Text="{Binding TotalXp}" TextColor="{StaticResource XpGold}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Total XP" TextColor="White" Opacity="0.8" FontSize="12" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="-2">
+                            <Label Text="{Binding LongestStreak}" TextColor="{StaticResource StreakOrange}" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Bästa streak" TextColor="White" Opacity="0.8" FontSize="12" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Label Text="{Binding Rank}" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" FontSize="16" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Bragder" Style="{StaticResource SectionTitle}" />
+                <Label Grid.Column="1" Text="{Binding ProgressLabel}" Style="{StaticResource Muted}" VerticalOptions="Center" />
+            </Grid>
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Achievements}" Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Achievement">
+                        <Border Style="{StaticResource Card}" Padding="14"
+                                Opacity="{Binding IsUnlocked, Converter={StaticResource BoolToOpacity}}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                <Label Text="{Binding Icon}" FontSize="32" VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold"
+                                           TextColor="{Binding IsUnlocked, Converter={StaticResource UnlockTextColor}}" />
+                                    <Label Text="{Binding Description}" Style="{StaticResource Muted}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="✓" FontSize="22" TextColor="{StaticResource AccentGreen}"
+                                       VerticalOptions="Center" IsVisible="{Binding IsUnlocked}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

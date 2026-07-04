@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="FitnessQuest.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:FitnessQuest.Views"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.TabBarBackgroundColor="{StaticResource Surface}"
+    Shell.TabBarForegroundColor="{StaticResource AccentGreen}"
+    Shell.TabBarUnselectedColor="{StaticResource TextMuted}"
+    Shell.TabBarTitleColor="{StaticResource AccentGreen}"
+    Shell.BackgroundColor="{StaticResource AppBg}"
+    Shell.ForegroundColor="{StaticResource TextPrimary}"
+    Shell.TitleColor="{StaticResource TextPrimary}"
+    Title="FitnessQuest">
+
+    <TabBar>
+        <ShellContent Title="Hem" Route="dashboard"
+                      ContentTemplate="{DataTemplate views:DashboardPage}" />
+        <ShellContent Title="Kost" Route="nutrition"
+                      ContentTemplate="{DataTemplate views:NutritionPage}" />
+        <ShellContent Title="Gym" Route="gym"
+                      ContentTemplate="{DataTemplate views:GymSessionPage}" />
+        <ShellContent Title="Cardio" Route="cardio"
+                      ContentTemplate="{DataTemplate views:CardioPage}" />
+        <ShellContent Title="Statistik" Route="stats"
+                      ContentTemplate="{DataTemplate views:StatisticsPage}" />
+    </TabBar>
+
+</Shell>

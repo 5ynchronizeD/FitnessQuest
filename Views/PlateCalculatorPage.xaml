@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.PlateCalculatorPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    x:Name="Page"
+    x:DataType="vm:PlateCalculatorViewModel"
+    Title="Viktkalkylator"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Mode switch -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="🏋️ Skivstång" FontSize="14"
+                        Command="{Binding SetModeCommand}" CommandParameter="Barbell"
+                        BackgroundColor="{StaticResource Surface}" TextColor="{StaticResource TextMuted}" CornerRadius="14" HeightRequest="52">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsBarbell}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="💪 Hantlar" FontSize="14"
+                        Command="{Binding SetModeCommand}" CommandParameter="Dumbbell"
+                        BackgroundColor="{StaticResource Surface}" TextColor="{StaticResource TextMuted}" CornerRadius="14" HeightRequest="52">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsBarbell}" Value="False">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <!-- Target + bar -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Målvikt (kg)" Style="{StaticResource Muted}" />
+                            <Entry Text="{Binding Target}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   FontSize="26" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="{Binding BarLabel}" Style="{StaticResource Muted}" />
+                            <Entry Text="{Binding Bar}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   FontSize="26" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                        <Button Text="−5" Command="{Binding BumpCommand}" CommandParameter="-5" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" CornerRadius="10" />
+                        <Button Grid.Column="1" Text="−2.5" Command="{Binding BumpCommand}" CommandParameter="-2.5" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" CornerRadius="10" />
+                        <Button Grid.Column="2" Text="+2.5" Command="{Binding BumpCommand}" CommandParameter="2.5" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" CornerRadius="10" />
+                        <Button Grid.Column="3" Text="+5" Command="{Binding BumpCommand}" CommandParameter="5" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" CornerRadius="10" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Plate inventory -->
+            <Label Text="Mina vikter" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Ange hur många du har av varje skiva (antal totalt). Lägg till egna vikter längst ner."
+                           Style="{StaticResource Muted}" FontSize="12" />
+                    <FlexLayout BindableLayout.ItemsSource="{Binding AvailablePlates}" Wrap="Wrap" JustifyContent="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PlateOption">
+                                <Border Margin="0,0,8,8" WidthRequest="158" BackgroundColor="{StaticResource SurfaceAlt}" Padding="12,10"
+                                        Opacity="{Binding HasAny, Converter={StaticResource BoolToOpacity}}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="14" /></Border.StrokeShape>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <BoxView WidthRequest="14" HeightRequest="14" CornerRadius="7" Color="{Binding Color}" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding Label, StringFormat=' {0} kg'}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" VerticalOptions="Center" />
+                                            <Label Grid.Column="2" Text="✕" TextColor="{StaticResource TextMuted}" FontSize="12" VerticalOptions="Center" IsVisible="{Binding IsCustom}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding BindingContext.RemovePlateCommand, Source={x:Reference Page}}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                            <Button Text="−" Command="{Binding BindingContext.DecreaseCountCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}"
+                                                    BackgroundColor="{StaticResource Surface}" TextColor="White" WidthRequest="36" HeightRequest="36" CornerRadius="8" Padding="0" />
+                                            <Label Grid.Column="1" Text="{Binding Count, StringFormat='{0} st'}" TextColor="{StaticResource TextPrimary}" HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                                            <Button Grid.Column="2" Text="+" Command="{Binding BindingContext.IncreaseCountCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}"
+                                                    BackgroundColor="{StaticResource Surface}" TextColor="White" WidthRequest="36" HeightRequest="36" CornerRadius="8" Padding="0" />
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Entry Text="{Binding NewPlate}" Placeholder="Egen vikt (kg), t.ex. 1.25" Keyboard="Numeric" Style="{StaticResource FieldEntry}" />
+                        <Button Grid.Column="1" Text="Lägg till" Command="{Binding AddPlateCommand}"
+                                BackgroundColor="{StaticResource AccentPrimary}" TextColor="White" CornerRadius="12" WidthRequest="100" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Visual bar with plates -->
+            <Border Style="{StaticResource Card}" Padding="12,20">
+                <VerticalStackLayout Spacing="14">
+                    <Grid HeightRequest="140" ColumnDefinitions="*,Auto,Auto">
+                        <BoxView Grid.Column="0" HeightRequest="10" Color="{StaticResource Gray300}" VerticalOptions="Center" />
+                        <BoxView Grid.Column="1" WidthRequest="14" HeightRequest="46" Color="{StaticResource Gray200}" VerticalOptions="Center" />
+                        <HorizontalStackLayout Grid.Column="2" Spacing="3" VerticalOptions="Center"
+                                               BindableLayout.ItemsSource="{Binding PlatesPerSide}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PlateChip">
+                                    <Border WidthRequest="26" HeightRequest="{Binding Height}" BackgroundColor="{Binding Color}" VerticalOptions="Center">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="5" /></Border.StrokeShape>
+                                        <Label Text="{Binding Label}" TextColor="White" FontSize="10" FontAttributes="Bold"
+                                               HorizontalOptions="Center" VerticalOptions="Center" Rotation="270" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <Label Text="{Binding PerSideText}" TextColor="{StaticResource TextPrimary}" FontSize="18"
+                           FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="{Binding PerSideCaption}" Style="{StaticResource Muted}" HorizontalOptions="Center" />
+                    <Label Text="{Binding PairNote}" Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="Center"
+                           IsVisible="{Binding IsBarbell, Converter={StaticResource InvertedBool}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource SurfaceAlt}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Total vikt" Style="{StaticResource Muted}" />
+                        <Label Text="{Binding AchievedText}" TextColor="{StaticResource AccentGreen}" FontSize="24" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="{Binding Hint}" Style="{StaticResource Muted}" VerticalOptions="Center"
+                           HorizontalTextAlignment="End" WidthRequest="150" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

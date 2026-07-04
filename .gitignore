@@ -1,0 +1,19 @@
+# .NET / MAUI build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Rider / VS
+.vs/
+.idea/
+*.user
+*.suo
+
+# Android signing / secrets
+*.keystore
+*.jks
+
+# OS files
+.DS_Store
+Thumbs.db
