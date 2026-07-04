@@ -28,6 +28,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<GamificationService>();
         builder.Services.AddSingleton<FeedbackService>();
         builder.Services.AddSingleton<StatsService>();
+        builder.Services.AddSingleton<ChallengeService>();
+        builder.Services.AddSingleton<ExportService>();
         builder.Services.AddSingleton<WorkoutImportService>();
         builder.Services.AddSingleton<INotificationService, Platforms.Android.NotificationService>();
         builder.Services.AddSingleton(_ => new OpenFoodFactsService(new HttpClient()));

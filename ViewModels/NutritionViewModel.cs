@@ -15,13 +15,15 @@ public partial class NutritionViewModel : BaseViewModel
     private readonly AppDatabase _db;
     private readonly OpenFoodFactsService _off;
     private readonly IServiceProvider _services;
+    private readonly GamificationService _gamification;
     private bool _lookingUp;
 
-    public NutritionViewModel(AppDatabase db, OpenFoodFactsService off, IServiceProvider services)
+    public NutritionViewModel(AppDatabase db, OpenFoodFactsService off, IServiceProvider services, GamificationService gamification)
     {
         _db = db;
         _off = off;
         _services = services;
+        _gamification = gamification;
         Title = "Kost";
 
         WeakReferenceMessenger.Default.Register<BarcodeScannedMessage>(this,
@@ -188,6 +190,37 @@ public partial class NutritionViewModel : BaseViewModel
         if (entry is null) return;
         await _db.DeleteFoodLogAsync(entry);
         await LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task CopyYesterday()
+    {
+        var yesterday = await _db.GetFoodLogForDayAsync(DateTime.Today.AddDays(-1));
+        if (yesterday.Count == 0)
+        {
+            await AlertAsync("Inget att kopiera", "Du loggade ingen mat igår.");
+            return;
+        }
+        var now = DateTime.Now;
+        foreach (var e in yesterday)
+        {
+            await _db.AddFoodLogAsync(new FoodLogEntry
+            {
+                FoodItemId = e.FoodItemId,
+                Name = e.Name,
+                Grams = e.Grams,
+                Meal = e.Meal,
+                KcalPer100g = e.KcalPer100g,
+                ProteinPer100g = e.ProteinPer100g,
+                CarbsPer100g = e.CarbsPer100g,
+                FatPer100g = e.FatPer100g,
+                LoggedAt = now
+            });
+        }
+        await _gamification.RegisterActivityAsync(ActivityType.FoodLog);
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("nutrition"));
+        await LoadAsync();
+        await AlertAsync("Kopierat", $"{yesterday.Count} måltider från igår lades till idag.");
     }
 
     [RelayCommand]

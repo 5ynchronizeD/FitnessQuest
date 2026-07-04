@@ -48,6 +48,12 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Muscle volume -->
+            <Label Text="Volym per muskelgrupp · 30 dagar" Style="{StaticResource SectionTitle}" IsVisible="{Binding HasMuscle}" />
+            <Border Style="{StaticResource Card}" IsVisible="{Binding HasMuscle}">
+                <GraphicsView x:Name="MuscleChart" HeightRequest="170" />
+            </Border>
+
             <!-- Cardio -->
             <Label Text="Cardio-distans · senaste 14 dagarna" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}">

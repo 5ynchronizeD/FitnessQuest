@@ -23,6 +23,7 @@ public class UserProfile
     public int ProteinGoal { get; set; } = 150;
     public int CarbsGoal { get; set; } = 220;
     public int FatGoal { get; set; } = 70;
+    public int WaterGoalGlasses { get; set; } = 8;
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

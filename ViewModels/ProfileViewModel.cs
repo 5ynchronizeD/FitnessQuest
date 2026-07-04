@@ -12,12 +12,14 @@ public partial class ProfileViewModel : BaseViewModel
 {
     private readonly AppDatabase _db;
     private readonly INotificationService _notifications;
+    private readonly ExportService _export;
     private bool _loadingReminder;
 
-    public ProfileViewModel(AppDatabase db, INotificationService notifications)
+    public ProfileViewModel(AppDatabase db, INotificationService notifications, ExportService export)
     {
         _db = db;
         _notifications = notifications;
+        _export = export;
         Title = "Profil";
         _loadingReminder = true;
         _reminderEnabled = Preferences.Get("reminder_enabled", false);
@@ -79,6 +81,24 @@ public partial class ProfileViewModel : BaseViewModel
 
     [RelayCommand] private void ReminderEarlier() => ReminderHour = Math.Max(5, ReminderHour - 1);
     [RelayCommand] private void ReminderLater() => ReminderHour = Math.Min(23, ReminderHour + 1);
+
+    [RelayCommand]
+    private async Task ExportData()
+    {
+        try
+        {
+            var path = await _export.WriteExportFileAsync();
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "FitnessQuest-export",
+                File = new ShareFile(path)
+            });
+        }
+        catch (Exception ex)
+        {
+            await AlertAsync("Export misslyckades", ex.Message);
+        }
+    }
 
     public List<ActivityLevel> ActivityLevels { get; } = new()
     {

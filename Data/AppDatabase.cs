@@ -33,6 +33,8 @@ public class AppDatabase
         await _db.CreateTableAsync<CardioSession>();
         await _db.CreateTableAsync<WeightEntry>();
         await _db.CreateTableAsync<WorkoutTemplate>();
+        await _db.CreateTableAsync<WaterDay>();
+        await _db.CreateTableAsync<DailyChallenge>();
 
         await EnsureSeedDataAsync(_db);
         return _db;
@@ -406,6 +408,37 @@ public class AppDatabase
         public DateTime PerformedAt { get; set; }
     }
 
+    /// <summary>Total training volume per muscle group within a date range.</summary>
+    public async Task<Dictionary<string, double>> GetMuscleVolumeAsync(DateTime from, DateTime to)
+    {
+        var db = await Connection();
+        var sql =
+            @"SELECT we.ExerciseName AS ExerciseName, (s.WeightKg * s.Reps) AS Vol
+              FROM ExerciseSet s
+              JOIN WorkoutExercise we ON we.Id = s.WorkoutExerciseId
+              JOIN Workout w ON w.Id = we.WorkoutId
+              WHERE w.PerformedAt >= ? AND w.PerformedAt < ? AND s.WeightKg > 0 AND s.Reps > 0";
+        var rows = await db.QueryAsync<MuscleVolRow>(sql, from, to);
+
+        var exercises = await db.Table<Exercise>().ToListAsync();
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var e in exercises) map[e.Name] = e.MuscleGroup;
+
+        var result = new Dictionary<string, double>();
+        foreach (var r in rows)
+        {
+            var muscle = map.TryGetValue(r.ExerciseName, out var m) ? m : "Övrigt";
+            result[muscle] = (result.TryGetValue(muscle, out var cur) ? cur : 0) + r.Vol;
+        }
+        return result;
+    }
+
+    private class MuscleVolRow
+    {
+        public string ExerciseName { get; set; } = string.Empty;
+        public double Vol { get; set; }
+    }
+
     /// <summary>Best estimated 1RM ever recorded for an exercise (0 if none).</summary>
     public async Task<double> GetBestE1RMForExerciseAsync(string exerciseName)
     {
@@ -479,5 +512,41 @@ public class AppDatabase
             t.LastUsed = DateTime.Now;
             await db.UpdateAsync(t);
         }
+    }
+
+    // ---- Water ----------------------------------------------------------
+    private static string DayKey(DateTime d) => d.ToString("yyyy-MM-dd");
+
+    public async Task<int> GetWaterAsync(DateTime day)
+    {
+        var db = await Connection();
+        var row = await db.FindAsync<WaterDay>(DayKey(day));
+        return row?.Glasses ?? 0;
+    }
+
+    public async Task SetWaterAsync(DateTime day, int glasses)
+    {
+        var db = await Connection();
+        await db.InsertOrReplaceAsync(new WaterDay { DateKey = DayKey(day), Glasses = Math.Max(0, glasses) });
+    }
+
+    // ---- Daily challenges -----------------------------------------------
+    public async Task<List<DailyChallenge>> GetChallengesForDayAsync(DateTime day)
+    {
+        var db = await Connection();
+        var key = DayKey(day);
+        return await db.Table<DailyChallenge>().Where(c => c.DateKey == key).ToListAsync();
+    }
+
+    public async Task InsertChallengesAsync(IEnumerable<DailyChallenge> challenges)
+    {
+        var db = await Connection();
+        await db.InsertAllAsync(challenges);
+    }
+
+    public async Task UpdateChallengeAsync(DailyChallenge challenge)
+    {
+        var db = await Connection();
+        await db.UpdateAsync(challenge);
     }
 }

@@ -41,6 +41,8 @@ public partial class WorkoutEditorViewModel : BaseViewModel
     public ObservableCollection<ExerciseBlockViewModel> Blocks { get; } = new();
 
     [ObservableProperty] private string _workoutName = "Gympass";
+    [ObservableProperty] private DateTime _workoutDate = DateTime.Today;
+    [ObservableProperty] private TimeSpan _workoutTime = DateTime.Now.TimeOfDay;
     [ObservableProperty] private string _elapsedLabel = "0:00";
     [ObservableProperty] private bool _hasBlocks;
     [ObservableProperty] private double _totalVolume;
@@ -63,6 +65,8 @@ public partial class WorkoutEditorViewModel : BaseViewModel
         {
             WorkoutName = SuggestName();
             _startedAt = DateTime.Now;
+            WorkoutDate = DateTime.Today;
+            WorkoutTime = DateTime.Now.TimeOfDay;
             StartSessionTimer();
             if (templateId > 0)
                 await LoadTemplateAsync(templateId);
@@ -74,6 +78,8 @@ public partial class WorkoutEditorViewModel : BaseViewModel
         if (workout is null) return;
         WorkoutName = workout.Name;
         _startedAt = workout.PerformedAt;
+        WorkoutDate = workout.PerformedAt.Date;
+        WorkoutTime = workout.PerformedAt.TimeOfDay;
 
         var exercises = await _db.GetWorkoutExercisesAsync(workoutId);
         foreach (var we in exercises)
@@ -345,11 +351,12 @@ public partial class WorkoutEditorViewModel : BaseViewModel
             foreach (var name in Blocks.Select(b => b.ExerciseName).Distinct(StringComparer.OrdinalIgnoreCase))
                 prevBest[name] = await _db.GetBestE1RMForExerciseAsync(name);
 
+            var performedAt = WorkoutDate.Date + WorkoutTime;
             var workout = new Workout
             {
                 Id = _editingWorkoutId,
                 Name = string.IsNullOrWhiteSpace(WorkoutName) ? "Gympass" : WorkoutName.Trim(),
-                PerformedAt = _startedAt,
+                PerformedAt = performedAt,
                 DurationSeconds = IsEditing ? 0 : (int)(DateTime.Now - _startedAt).TotalSeconds
             };
 

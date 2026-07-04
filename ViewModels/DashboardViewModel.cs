@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -11,13 +12,24 @@ namespace FitnessQuest.ViewModels;
 public partial class DashboardViewModel : BaseViewModel
 {
     private readonly AppDatabase _db;
+    private readonly ChallengeService _challenges;
+    private readonly FeedbackService _feedback;
 
-    public DashboardViewModel(AppDatabase db)
+    public DashboardViewModel(AppDatabase db, ChallengeService challenges, FeedbackService feedback)
     {
         _db = db;
+        _challenges = challenges;
+        _feedback = feedback;
         Title = "FitnessQuest";
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (_, _) => _ = LoadAsync());
     }
+
+    public ObservableCollection<DailyChallenge> Challenges { get; } = new();
+
+    [ObservableProperty] private int _waterGlasses;
+    [ObservableProperty] private int _waterGoal = 8;
+    [ObservableProperty] private double _waterProgress;
+    [ObservableProperty] private string _waterLabel = "0 / 8 glas";
 
     // Player card
     [ObservableProperty] private int _level = 1;
@@ -104,11 +116,49 @@ public partial class DashboardViewModel : BaseViewModel
             var achievements = await _db.GetAchievementsAsync();
             TotalAchievements = achievements.Count;
             UnlockedCount = achievements.Count(a => a.IsUnlocked);
+
+            // Water
+            WaterGoal = profile.WaterGoalGlasses;
+            WaterGlasses = await _db.GetWaterAsync(DateTime.Today);
+            UpdateWater();
+
+            // Daily challenges (also awards XP for newly completed)
+            var challengeResult = await _challenges.EnsureAndEvaluateAsync();
+            Challenges.Clear();
+            foreach (var c in challengeResult.Challenges)
+                Challenges.Add(c);
+            if (challengeResult.Reward is { } r && (r.LeveledUp || r.NewAchievements.Count > 0 || r.XpGained > 0))
+                await _feedback.CelebrateAsync(r);
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    private void UpdateWater()
+    {
+        WaterProgress = WaterGoal <= 0 ? 0 : Math.Min(1.0, (double)WaterGlasses / WaterGoal);
+        WaterLabel = $"{WaterGlasses} / {WaterGoal} glas";
+    }
+
+    [RelayCommand]
+    private async Task AddWater()
+    {
+        WaterGlasses++;
+        UpdateWater();
+        await _db.SetWaterAsync(DateTime.Today, WaterGlasses);
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("water"));
+    }
+
+    [RelayCommand]
+    private async Task RemoveWater()
+    {
+        if (WaterGlasses <= 0) return;
+        WaterGlasses--;
+        UpdateWater();
+        await _db.SetWaterAsync(DateTime.Today, WaterGlasses);
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("water"));
     }
 
     private static double Clamp(double v) => Math.Max(0, Math.Min(1, v));

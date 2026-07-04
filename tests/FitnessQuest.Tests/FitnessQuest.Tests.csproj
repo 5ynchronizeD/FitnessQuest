@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+  </ItemGroup>
+
+  <!-- Test files -->
+  <ItemGroup>
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <!-- Pure logic + minimal model deps, linked from the app project -->
+  <ItemGroup>
+    <Compile Include="..\..\Services\PlateCalculator.cs" Link="src\PlateCalculator.cs" />
+    <Compile Include="..\..\Services\NutritionTargets.cs" Link="src\NutritionTargets.cs" />
+    <Compile Include="..\..\Services\NutritionAdvisor.cs" Link="src\NutritionAdvisor.cs" />
+    <Compile Include="..\..\Services\WorkoutImportService.cs" Link="src\WorkoutImportService.cs" />
+    <Compile Include="..\..\Models\Enums.cs" Link="src\Enums.cs" />
+    <Compile Include="..\..\Models\UserProfile.cs" Link="src\UserProfile.cs" />
+    <Compile Include="..\..\Models\TrackPoint.cs" Link="src\TrackPoint.cs" />
+    <Compile Include="..\..\Models\Gamification.cs" Link="src\Gamification.cs" />
+  </ItemGroup>
+
+</Project>

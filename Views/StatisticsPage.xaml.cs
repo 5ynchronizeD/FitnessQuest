@@ -16,6 +16,7 @@ public partial class StatisticsPage : ContentPage
     };
     private readonly ChartDrawable _volume = new() { BarColor = Color.FromArgb("#7C4DFF"), ShowValues = false };
     private readonly ChartDrawable _cardio = new() { BarColor = Color.FromArgb("#4ECDC4"), ValueFormat = "0.#", ShowValues = false };
+    private readonly ChartDrawable _muscle = new() { BarColor = Color.FromArgb("#FF6B6B"), ShowValues = false };
     private readonly ChartDrawable _progression = new() { BarColor = Color.FromArgb("#FFC93C"), IsLine = true, ZeroBased = false };
 
     public StatisticsPage(StatisticsViewModel vm)
@@ -26,6 +27,7 @@ public partial class StatisticsPage : ContentPage
         CalorieChart.Drawable = _calorie;
         VolumeChart.Drawable = _volume;
         CardioChart.Drawable = _cardio;
+        MuscleChart.Drawable = _muscle;
         ProgressionChart.Drawable = _progression;
 
         _vm.ChartsUpdated += RefreshCharts;
@@ -48,6 +50,10 @@ public partial class StatisticsPage : ContentPage
 
         _cardio.Values = _vm.CardioValues;
         _cardio.Labels = _vm.CardioLabels;
+
+        _muscle.Values = _vm.MuscleValues;
+        _muscle.Labels = _vm.MuscleLabels;
+        MuscleChart.Invalidate();
 
         _progression.Values = _vm.ProgressionValues;
         _progression.Labels = _vm.ProgressionLabels;

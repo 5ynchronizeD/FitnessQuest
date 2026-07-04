@@ -74,6 +74,16 @@ public class StatsService
         return result;
     }
 
+    /// <summary>Training volume per muscle group over the last N days, largest first.</summary>
+    public async Task<List<(string Muscle, double Volume)>> GetMuscleVolumeAsync(int days = 30)
+    {
+        var from = DateTime.Today.AddDays(-(days - 1));
+        var map = await _db.GetMuscleVolumeAsync(from, DateTime.Today.AddDays(1));
+        return map.OrderByDescending(kv => kv.Value)
+            .Select(kv => (kv.Key, kv.Value))
+            .ToList();
+    }
+
     public async Task<List<ProgressionPoint>> GetExerciseProgressionAsync(string exerciseName)
     {
         var raw = await _db.GetExerciseProgressionAsync(exerciseName);

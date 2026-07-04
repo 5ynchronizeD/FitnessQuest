@@ -84,6 +84,25 @@ public class GamificationService
     }
 
     /// <summary>
+    /// Awards flat XP (e.g. daily-challenge reward) without touching the streak,
+    /// then re-evaluates achievements. Returns level-up / unlock info.
+    /// </summary>
+    public async Task<GamificationResult> AwardXpAsync(int xp)
+    {
+        var state = await _db.GetStateAsync();
+        var result = new GamificationResult { OldLevel = state.Level };
+        state.TotalXp += Math.Max(0, xp);
+        await _db.SaveStateAsync(state);
+        result.XpGained = xp;
+
+        result.NewAchievements = await EvaluateAchievementsAsync(state);
+        var final = await _db.GetStateAsync();
+        result.NewLevel = final.Level;
+        result.LeveledUp = result.NewLevel > result.OldLevel;
+        return result;
+    }
+
+    /// <summary>
     /// Checks every locked achievement against current aggregate stats and
     /// unlocks any that qualify, granting their XP reward.
     /// </summary>
@@ -114,19 +133,28 @@ public class GamificationService
             {
                 "streak_3" => streak >= 3,
                 "streak_7" => streak >= 7,
+                "streak_14" => streak >= 14,
                 "streak_30" => streak >= 30,
+                "streak_100" => streak >= 100,
                 "food_first" => foodCount >= 1,
                 "food_25" => foodCount >= 25,
                 "food_100" => foodCount >= 100,
+                "food_365" => foodCount >= 365,
                 "gym_first" => gymCount >= 1,
                 "gym_10" => gymCount >= 10,
+                "gym_25" => gymCount >= 25,
+                "gym_50" => gymCount >= 50,
                 "gym_vol" => maxWorkoutVolume >= 1000,
+                "gym_vol2" => maxWorkoutVolume >= 2500,
                 "cardio_first" => cardioCount >= 1,
                 "cardio_10km" => cardioDist >= 10,
+                "cardio_50km" => cardioDist >= 50,
                 "cardio_100km" => cardioDist >= 100,
+                "cardio_500km" => cardioDist >= 500,
                 "level_5" => level >= 5,
                 "level_10" => level >= 10,
                 "level_25" => level >= 25,
+                "level_50" => level >= 50,
                 _ => false
             };
 

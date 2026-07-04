@@ -42,6 +42,11 @@ public partial class StatisticsViewModel : BaseViewModel
     public string[] CardioLabels { get; private set; } = Array.Empty<string>();
     [ObservableProperty] private double _cardioTotal14;
 
+    // Muscle volume
+    public double[] MuscleValues { get; private set; } = Array.Empty<double>();
+    public string[] MuscleLabels { get; private set; } = Array.Empty<string>();
+    [ObservableProperty] private bool _hasMuscle;
+
     // Progression
     public double[] ProgressionValues { get; private set; } = Array.Empty<double>();
     public string[] ProgressionLabels { get; private set; } = Array.Empty<string>();
@@ -77,6 +82,11 @@ public partial class StatisticsViewModel : BaseViewModel
             CardioValues = cardio.Select(c => Math.Round(c.Value, 1)).ToArray();
             CardioLabels = cardio.Select((c, i) => i % 2 == 0 ? c.Date.ToString("d/M") : string.Empty).ToArray();
             CardioTotal14 = cardio.Sum(c => c.Value);
+
+            var muscle = await _stats.GetMuscleVolumeAsync(30);
+            HasMuscle = muscle.Count > 0;
+            MuscleValues = muscle.Select(m => Math.Round(m.Volume)).ToArray();
+            MuscleLabels = muscle.Select(m => m.Muscle).ToArray();
 
             var names = await _stats.GetTrainedExerciseNamesAsync();
             ExerciseNames.Clear();

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
     x:DataType="vm:DashboardViewModel"
     Title="FitnessQuest"
     BackgroundColor="{StaticResource AppBg}">
@@ -67,6 +68,44 @@
                             <Label Text="Längsta streak" Style="{StaticResource Muted}" />
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Daily challenges -->
+            <Label Text="Dagens utmaningar" Style="{StaticResource SectionTitle}" />
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Challenges}" Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:DailyChallenge">
+                        <Border Style="{StaticResource Card}" Padding="14,12">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Label Grid.Column="0" Text="✓" FontSize="18" FontAttributes="Bold" VerticalOptions="Center"
+                                       TextColor="{StaticResource AccentGreen}" IsVisible="{Binding Completed}" />
+                                <Label Grid.Column="0" Text="○" FontSize="18" VerticalOptions="Center"
+                                       TextColor="{StaticResource TextMuted}" IsVisible="{Binding Completed, Converter={StaticResource InvertedBool}}" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                    <Label Text="{Binding Description}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" FontSize="14" />
+                                    <ProgressBar Progress="{Binding ProgressFraction}" ProgressColor="{StaticResource AccentGreen}" BackgroundColor="{StaticResource SurfaceAlt}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2" Spacing="-2" VerticalOptions="Center">
+                                    <Label Text="{Binding XpText}" TextColor="{StaticResource XpGold}" FontSize="12" FontAttributes="Bold" HorizontalOptions="End" />
+                                    <Label Text="{Binding ProgressText}" Style="{StaticResource Muted}" FontSize="11" HorizontalOptions="End" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- Water -->
+            <Border Style="{StaticResource Card}">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                    <Label Text="💧" FontSize="28" VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="{Binding WaterLabel}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" />
+                        <ProgressBar Progress="{Binding WaterProgress}" ProgressColor="{StaticResource CarbsColor}" BackgroundColor="{StaticResource SurfaceAlt}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="2" Text="−" Command="{Binding RemoveWaterCommand}" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" WidthRequest="44" HeightRequest="44" CornerRadius="10" Padding="0" />
+                    <Button Grid.Column="3" Text="+" Command="{Binding AddWaterCommand}" BackgroundColor="{StaticResource CarbsColor}" TextColor="{StaticResource AppBg}" FontAttributes="Bold" WidthRequest="44" HeightRequest="44" CornerRadius="10" Padding="0" />
                 </Grid>
             </Border>
 

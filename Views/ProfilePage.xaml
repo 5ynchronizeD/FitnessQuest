@@ -139,6 +139,11 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Data -->
+            <Label Text="Data" Style="{StaticResource SectionTitle}" />
+            <Button Text="📤 Exportera all data (JSON)" Command="{Binding ExportDataCommand}"
+                    BackgroundColor="{StaticResource Surface}" TextColor="{StaticResource TextPrimary}" CornerRadius="14" HeightRequest="50" />
+
             <BoxView HeightRequest="12" Color="Transparent" />
         </VerticalStackLayout>
     </ScrollView>

@@ -16,6 +16,10 @@
             <VerticalStackLayout Spacing="8">
                 <Entry Text="{Binding WorkoutName}" Placeholder="Passnamn" FontSize="18" FontAttributes="Bold"
                        TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextMuted}" BackgroundColor="Transparent" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <DatePicker Date="{Binding WorkoutDate}" Format="ddd d MMM" TextColor="{StaticResource TextMuted}" FontSize="13" />
+                    <TimePicker Grid.Column="1" Time="{Binding WorkoutTime}" Format="HH:mm" TextColor="{StaticResource TextMuted}" FontSize="13" />
+                </Grid>
                 <Grid ColumnDefinitions="*,*,*">
                     <VerticalStackLayout Grid.Column="0" Spacing="-2">
                         <Label Text="⏱ Tid" Style="{StaticResource Muted}" FontSize="11" />
