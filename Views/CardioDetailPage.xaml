@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.CardioDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    x:DataType="vm:CardioDetailViewModel"
+    Title="Passdetaljer"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="16">
+
+            <Label Text="{Binding Header}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}" />
+            <Label Text="{Binding DateText}" Style="{StaticResource Muted}" />
+
+            <!-- Summary tiles -->
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Distans" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding DistanceText}" TextColor="{StaticResource AccentGreen}" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Tid" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding DurationText}" TextColor="{StaticResource TextPrimary}" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Tempo" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding PaceText}" TextColor="{StaticResource TextPrimary}" FontSize="16" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Snittpuls" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding AvgHrText}" TextColor="{StaticResource ProteinColor}" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Maxpuls" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding MaxHrText}" TextColor="{StaticResource ProteinColor}" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="-2">
+                        <Label Text="Stigning" Style="{StaticResource Muted}" FontSize="11" />
+                        <Label Text="{Binding ElevationText}" TextColor="{StaticResource FatColor}" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- HR over time -->
+            <Label Text="Puls över tid" Style="{StaticResource SectionTitle}" IsVisible="{Binding HasHr}" />
+            <Border Style="{StaticResource Card}" IsVisible="{Binding HasHr}">
+                <GraphicsView x:Name="HrChart" HeightRequest="170" />
+            </Border>
+
+            <!-- Elevation -->
+            <Label Text="Höjdprofil (m över lägsta)" Style="{StaticResource SectionTitle}" IsVisible="{Binding HasElevation}" />
+            <Border Style="{StaticResource Card}" IsVisible="{Binding HasElevation}">
+                <GraphicsView x:Name="EleChart" HeightRequest="150" />
+            </Border>
+
+            <!-- HR per pace -->
+            <Label Text="Puls per tempo (min/km)" Style="{StaticResource SectionTitle}" IsVisible="{Binding HasPaceHr}" />
+            <Border Style="{StaticResource Card}" IsVisible="{Binding HasPaceHr}">
+                <GraphicsView x:Name="PaceHrChart" HeightRequest="170" />
+            </Border>
+
+            <Label Text="Ingen puls- eller höjddata i den här filen." Style="{StaticResource Muted}"
+                   HorizontalOptions="Center" Margin="0,20" IsVisible="{Binding HasNoData}" />
+
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

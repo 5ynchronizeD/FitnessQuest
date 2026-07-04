@@ -28,6 +28,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<GamificationService>();
         builder.Services.AddSingleton<FeedbackService>();
         builder.Services.AddSingleton<StatsService>();
+        builder.Services.AddSingleton<WorkoutImportService>();
         builder.Services.AddSingleton(_ => new OpenFoodFactsService(new HttpClient()));
 
         // ---- ViewModels ----
@@ -38,9 +39,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<AchievementsViewModel>();
         builder.Services.AddSingleton<StatisticsViewModel>();
         builder.Services.AddTransient<AddFoodViewModel>();
+        builder.Services.AddTransient<QuickLogViewModel>();
         builder.Services.AddTransient<WorkoutEditorViewModel>();
         builder.Services.AddTransient<ExercisePickerViewModel>();
         builder.Services.AddTransient<PlateCalculatorViewModel>();
+        builder.Services.AddTransient<CardioDetailViewModel>();
 
         // ---- Pages ----
         builder.Services.AddSingleton<DashboardPage>();
@@ -50,10 +53,12 @@ public static class MauiProgram
         builder.Services.AddTransient<AchievementsPage>();
         builder.Services.AddSingleton<StatisticsPage>();
         builder.Services.AddTransient<AddFoodPage>();
+        builder.Services.AddTransient<QuickLogPage>();
         builder.Services.AddTransient<BarcodeScanPage>();
         builder.Services.AddTransient<WorkoutEditorPage>();
         builder.Services.AddTransient<ExercisePickerPage>();
         builder.Services.AddTransient<PlateCalculatorPage>();
+        builder.Services.AddTransient<CardioDetailPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

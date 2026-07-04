@@ -124,6 +124,15 @@ public class CardioSession
     [Indexed]
     public DateTime PerformedAt { get; set; } = DateTime.Now;
 
+    // Imported watch data (TCX/GPX). TrackJson holds the per-point series.
+    public int AvgHeartRate { get; set; }
+    public int MaxHeartRate { get; set; }
+    public double ElevationGainM { get; set; }
+    public string? TrackJson { get; set; }
+
+    [Ignore] public bool HasTrackData => !string.IsNullOrEmpty(TrackJson);
+    [Ignore] public string HrSummary => AvgHeartRate > 0 ? $"❤ {AvgHeartRate}/{MaxHeartRate} bpm" : string.Empty;
+
     [Ignore] public double PaceMinPerKm => DistanceKm > 0 ? DurationMinutes / DistanceKm : 0;
     [Ignore] public double SpeedKmh => DurationMinutes > 0 ? DistanceKm / (DurationMinutes / 60.0) : 0;
 

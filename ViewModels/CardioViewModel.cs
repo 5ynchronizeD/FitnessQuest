@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitnessQuest.Data;
 using FitnessQuest.Models;
 using FitnessQuest.Services;
+using FitnessQuest.Views;
 
 namespace FitnessQuest.ViewModels;
 
@@ -13,12 +15,14 @@ public partial class CardioViewModel : BaseViewModel
     private readonly AppDatabase _db;
     private readonly GamificationService _gamification;
     private readonly FeedbackService _feedback;
+    private readonly WorkoutImportService _import;
 
-    public CardioViewModel(AppDatabase db, GamificationService gamification, FeedbackService feedback)
+    public CardioViewModel(AppDatabase db, GamificationService gamification, FeedbackService feedback, WorkoutImportService import)
     {
         _db = db;
         _gamification = gamification;
         _feedback = feedback;
+        _import = import;
         Title = "Cardio";
     }
 
@@ -64,6 +68,19 @@ public partial class CardioViewModel : BaseViewModel
 
     [RelayCommand]
     private void SelectType(CardioType type) => SelectedType = type;
+
+    [RelayCommand]
+    private async Task OpenSession(CardioSession? session)
+    {
+        if (session is null) return;
+        if (session.HasTrackData)
+        {
+            // Imported watch session → show the graphs instead of the edit form.
+            await Shell.Current.GoToAsync($"{nameof(CardioDetailPage)}?id={session.Id}");
+            return;
+        }
+        EditSession(session);
+    }
 
     [RelayCommand]
     private void EditSession(CardioSession? session)
@@ -113,6 +130,59 @@ public partial class CardioViewModel : BaseViewModel
             RecentSessions.Add(s);
         HasHistory = RecentSessions.Count > 0;
         TotalDistance = await _db.TotalCardioDistanceAsync();
+    }
+
+    [RelayCommand]
+    private async Task Import()
+    {
+        if (IsBusy) return;
+        try
+        {
+            var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = "Välj TCX- eller GPX-fil" });
+            if (file is null) return;
+
+            IsBusy = true;
+            string content;
+            using (var stream = await file.OpenReadAsync())
+            using (var reader = new StreamReader(stream))
+                content = await reader.ReadToEndAsync();
+
+            var imported = _import.Parse(content);
+            if (imported is null || imported.Points.Count < 2)
+            {
+                await AlertAsync("Kunde inte läsa filen", "Kontrollera att det är en giltig TCX- eller GPX-fil från klockan.");
+                return;
+            }
+
+            var session = new CardioSession
+            {
+                Type = imported.Type,
+                DistanceKm = Math.Round(imported.DistanceKm, 2),
+                DurationMinutes = Math.Round(imported.DurationMinutes, 1),
+                PerformedAt = imported.StartedAt,
+                AvgHeartRate = imported.AvgHeartRate,
+                MaxHeartRate = imported.MaxHeartRate,
+                ElevationGainM = imported.ElevationGainM,
+                TrackJson = JsonSerializer.Serialize(imported.Points)
+            };
+            await _db.AddCardioAsync(session);
+
+            int bonus = (int)(session.DistanceKm * 5);
+            var result = await _gamification.RegisterActivityAsync(ActivityType.CardioSession, bonus);
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("cardio"));
+
+            await Load();
+            await _feedback.CelebrateAsync(result);
+            await Shell.Current.GoToAsync($"{nameof(CardioDetailPage)}?id={session.Id}");
+        }
+        catch (Exception ex)
+        {
+            await AlertAsync("Import misslyckades", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]

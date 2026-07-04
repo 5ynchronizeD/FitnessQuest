@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.QuickLogPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
+    x:DataType="vm:QuickLogViewModel"
+    Title="Snabblogg"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <Label Text="Skriv in kalorier och makros direkt" Style="{StaticResource Muted}" />
+
+            <Entry Text="{Binding FoodName}" Placeholder="Namn (valfritt)" Style="{StaticResource FieldEntry}" />
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Kalorier (kcal)" Style="{StaticResource Muted}" />
+                            <Entry Text="{Binding Kcal}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   FontSize="26" FontAttributes="Bold" HorizontalTextAlignment="Center" Placeholder="0" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Text="≈ från makros" Command="{Binding UseMacroKcalCommand}"
+                                IsVisible="{Binding ShowMacroKcal}" VerticalOptions="End"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}"
+                                FontSize="12" CornerRadius="10" />
+                    </Grid>
+                    <Label Text="{Binding KcalFromMacros, StringFormat='Makrona motsvarar ca {0:0} kcal'}"
+                           Style="{StaticResource Muted}" FontSize="11" IsVisible="{Binding ShowMacroKcal}" />
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Protein (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource ProteinColor}" />
+                            <Entry Text="{Binding Protein}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   HorizontalTextAlignment="Center" Placeholder="0" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Kolhydr. (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource CarbsColor}" />
+                            <Entry Text="{Binding Carbs}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   HorizontalTextAlignment="Center" Placeholder="0" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="2">
+                            <Label Text="Fett (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource FatColor}" />
+                            <Entry Text="{Binding Fat}" Keyboard="Numeric" Style="{StaticResource FieldEntry}"
+                                   HorizontalTextAlignment="Center" Placeholder="0" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Måltid" Style="{StaticResource SectionTitle}" />
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="🌅 Frukost" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Breakfast}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Breakfast}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="🍽️ Lunch" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Lunch}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Lunch}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="2" Text="🌙 Middag" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Dinner}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Dinner}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="3" Text="🍎 Snack" FontSize="12"
+                        Command="{Binding SelectMealCommand}" CommandParameter="{x:Static models:MealType.Snack}"
+                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SelectedMeal}" Value="{x:Static models:MealType.Snack}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <Button Text="Logga  (+10 XP)" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" />
+            <Button Text="Avbryt" Command="{Binding CancelCommand}" BackgroundColor="Transparent" TextColor="{StaticResource TextMuted}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

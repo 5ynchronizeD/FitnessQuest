@@ -33,9 +33,23 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Scan + search -->
-            <Button Text="📷  Skanna streckkod" Style="{StaticResource GreenButton}"
-                    Command="{Binding ScanBarcodeCommand}" />
+            <!-- Balance suggestion (only shown when useful) -->
+            <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource SurfaceAlt}" IsVisible="{Binding HasSuggestion}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Label Text="{Binding SuggestionText}" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" FontSize="13" />
+                    <Button Grid.Column="1" Text="✕" Command="{Binding DismissSuggestionCommand}"
+                            BackgroundColor="Transparent" TextColor="{StaticResource TextMuted}" WidthRequest="40" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Scan + quick log + search -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="📷  Skanna" Style="{StaticResource GreenButton}"
+                        Command="{Binding ScanBarcodeCommand}" />
+                <Button Grid.Column="1" Text="⚡  Snabblogg" Command="{Binding QuickLogCommand}"
+                        BackgroundColor="{StaticResource AccentPrimary}" TextColor="White" FontAttributes="Bold"
+                        FontSize="16" CornerRadius="16" HeightRequest="54" />
+            </Grid>
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <Entry Placeholder="Sök livsmedel..." Text="{Binding SearchQuery}"

@@ -47,6 +47,10 @@ public partial class NutritionViewModel : BaseViewModel
     [ObservableProperty] private double _totalFat;
     [ObservableProperty] private bool _hasEntries;
 
+    [ObservableProperty] private string _suggestionText = string.Empty;
+    [ObservableProperty] private bool _hasSuggestion;
+    private string _dismissedSuggestion = string.Empty;
+
     [RelayCommand]
     private async Task Load() => await LoadAsync();
 
@@ -76,11 +80,32 @@ public partial class NutritionViewModel : BaseViewModel
             RecentFoods.Clear();
             foreach (var f in recents)
                 RecentFoods.Add(f);
+
+            // Quiet, timely balance tip (null most of the time).
+            var tip = NutritionAdvisor.Suggest(TotalKcal, TotalProtein, TotalCarbs, TotalFat,
+                profile, DateTime.Now.Hour, entries.Count);
+            SuggestionText = tip ?? string.Empty;
+            HasSuggestion = tip is not null && tip != _dismissedSuggestion;
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    private void DismissSuggestion()
+    {
+        _dismissedSuggestion = SuggestionText;
+        HasSuggestion = false;
+    }
+
+    [RelayCommand]
+    private async Task QuickLog()
+    {
+        var page = _services.GetRequiredService<QuickLogPage>();
+        if (Application.Current?.Windows.FirstOrDefault()?.Page is { } current)
+            await current.Navigation.PushModalAsync(page);
     }
 
     [RelayCommand]
