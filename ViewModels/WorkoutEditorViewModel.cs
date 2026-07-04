@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -19,6 +20,7 @@ public partial class WorkoutEditorViewModel : BaseViewModel
     private readonly AppDatabase _db;
     private readonly GamificationService _gamification;
     private readonly FeedbackService _feedback;
+    private readonly INotificationService _notifications;
 
     private IDispatcherTimer? _sessionTimer;
     private IDispatcherTimer? _restTimer;
@@ -26,11 +28,12 @@ public partial class WorkoutEditorViewModel : BaseViewModel
     private int _editingWorkoutId;
     private int _nextSupersetGroup = 1;
 
-    public WorkoutEditorViewModel(AppDatabase db, GamificationService gamification, FeedbackService feedback)
+    public WorkoutEditorViewModel(AppDatabase db, GamificationService gamification, FeedbackService feedback, INotificationService notifications)
     {
         _db = db;
         _gamification = gamification;
         _feedback = feedback;
+        _notifications = notifications;
         WeakReferenceMessenger.Default.Register<ExercisePickedMessage>(this,
             (_, m) => AddExerciseBlock(m.Value));
     }
@@ -51,7 +54,7 @@ public partial class WorkoutEditorViewModel : BaseViewModel
     public bool IsEditing => _editingWorkoutId != 0;
 
     // ---- Loading --------------------------------------------------------
-    public async Task InitializeAsync(int workoutId)
+    public async Task InitializeAsync(int workoutId, int templateId = 0)
     {
         Blocks.Clear();
         _editingWorkoutId = workoutId;
@@ -61,6 +64,8 @@ public partial class WorkoutEditorViewModel : BaseViewModel
             WorkoutName = SuggestName();
             _startedAt = DateTime.Now;
             StartSessionTimer();
+            if (templateId > 0)
+                await LoadTemplateAsync(templateId);
             return;
         }
 
@@ -170,6 +175,81 @@ public partial class WorkoutEditorViewModel : BaseViewModel
         await Shell.Current.GoToAsync($"{nameof(PlateCalculatorPage)}?target={top:0.##}");
     }
 
+    private async Task LoadTemplateAsync(int templateId)
+    {
+        var template = await _db.GetTemplateAsync(templateId);
+        if (template is null) return;
+        WorkoutName = template.Name;
+        await _db.BumpTemplateUsageAsync(templateId);
+
+        List<TemplateExercise> exercises;
+        try { exercises = JsonSerializer.Deserialize<List<TemplateExercise>>(template.PayloadJson) ?? new(); }
+        catch { exercises = new(); }
+
+        foreach (var te in exercises)
+        {
+            var block = CreateBlock(te.ExerciseName, te.Equipment);
+            block.RestSeconds = te.RestSeconds;
+            block.SupersetGroup = te.SupersetGroup;
+            _nextSupersetGroup = Math.Max(_nextSupersetGroup, te.SupersetGroup + 1);
+            foreach (var ts in te.Sets)
+            {
+                block.AddSetRow(new SetRowViewModel(0)
+                {
+                    Weight = ts.WeightKg > 0 ? ts.WeightKg.ToString("0.##") : string.Empty,
+                    Reps = ts.Reps > 0 ? ts.Reps.ToString() : string.Empty,
+                    SetType = ts.SetType
+                });
+            }
+            block.Recalculate();
+            Blocks.Add(block);
+        }
+        RecalculateTotals();
+    }
+
+    [RelayCommand]
+    private async Task SaveAsTemplate()
+    {
+        if (Blocks.Count == 0)
+        {
+            await AlertAsync("Tomt pass", "Lägg till övningar innan du sparar som mall.");
+            return;
+        }
+        var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+        string name = WorkoutName;
+        if (page is not null)
+        {
+            var entered = await page.DisplayPromptAsync("Spara som mall", "Namn på rutinen:",
+                initialValue: WorkoutName, accept: "Spara", cancel: "Avbryt");
+            if (entered is null) return;
+            if (!string.IsNullOrWhiteSpace(entered)) name = entered.Trim();
+        }
+
+        var payload = Blocks.Select(b => new TemplateExercise
+        {
+            ExerciseName = b.ExerciseName,
+            Equipment = b.Equipment,
+            RestSeconds = b.RestSeconds,
+            SupersetGroup = b.SupersetGroup,
+            Sets = b.Sets.Select(s => new TemplateSet
+            {
+                WeightKg = s.WeightKg,
+                Reps = s.RepsValue,
+                SetType = s.SetType
+            }).ToList()
+        }).ToList();
+
+        await _db.SaveTemplateAsync(new WorkoutTemplate
+        {
+            Name = name,
+            PayloadJson = JsonSerializer.Serialize(payload),
+            ExerciseCount = payload.Count
+        });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("gym"));
+        if (page is not null)
+            await page.DisplayAlert("Sparad", $"Mallen \"{name}\" är sparad.", "OK");
+    }
+
     private void RecalculateTotals()
     {
         TotalVolume = Blocks.Sum(b => b.TotalVolume);
@@ -203,6 +283,7 @@ public partial class WorkoutEditorViewModel : BaseViewModel
                 _restTimer?.Stop();
                 RestActive = false;
                 try { HapticFeedback.Perform(HapticFeedbackType.LongPress); } catch { }
+                _notifications.ShowNow(7001, "Vila klar 💪", "Dags för nästa set!");
             }
         };
         _restTimer.Start();
@@ -259,6 +340,11 @@ public partial class WorkoutEditorViewModel : BaseViewModel
             IsBusy = true;
             StopTimers();
 
+            // Capture previous bests to detect PRs after saving.
+            var prevBest = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            foreach (var name in Blocks.Select(b => b.ExerciseName).Distinct(StringComparer.OrdinalIgnoreCase))
+                prevBest[name] = await _db.GetBestE1RMForExerciseAsync(name);
+
             var workout = new Workout
             {
                 Id = _editingWorkoutId,
@@ -295,10 +381,24 @@ public partial class WorkoutEditorViewModel : BaseViewModel
                 result = await _gamification.RegisterActivityAsync(ActivityType.GymWorkout, bonus);
             }
 
+            // Detect new personal records (only for exercises with prior history).
+            var prs = new List<string>();
+            foreach (var b in Blocks)
+            {
+                double newBest = b.Sets
+                    .Where(s => s.WeightKg > 0 && s.RepsValue > 0)
+                    .Select(s => s.WeightKg * (1 + s.RepsValue / 30.0))
+                    .DefaultIfEmpty(0).Max();
+                if (prevBest.TryGetValue(b.ExerciseName, out var prev) && prev > 0 && newBest > prev + 0.5)
+                    prs.Add($"{b.ExerciseName}: {b.Sets.Where(s => s.WeightKg > 0).Select(s => s.WeightKg).DefaultIfEmpty(0).Max():0} kg");
+            }
+
             WeakReferenceMessenger.Default.Send(new DataChangedMessage("gym"));
             await Shell.Current.GoToAsync("..");
             if (result is not null)
                 await _feedback.CelebrateAsync(result);
+            if (prs.Count > 0)
+                await AlertAsync("🏆 Nytt personbästa!", string.Join("\n", prs));
         }
         finally
         {

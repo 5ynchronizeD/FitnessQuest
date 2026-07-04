@@ -16,6 +16,8 @@ public class ChartDrawable : IDrawable
     public double? GoalValue { get; set; }
     public string ValueFormat { get; set; } = "0";
     public bool ShowValues { get; set; } = true;
+    /// <summary>When false (line charts), scale between data min and max instead of 0..max.</summary>
+    public bool ZeroBased { get; set; } = true;
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
@@ -26,10 +28,19 @@ public class ChartDrawable : IDrawable
         float h = dirtyRect.Height - topPad - bottomPad;
         if (w <= 0 || h <= 0) return;
 
-        double max = Math.Max(Values.Max(), GoalValue ?? 0);
-        if (max <= 0) max = 1;
-        // Headroom so the tallest bar doesn't touch the top.
-        max *= 1.15;
+        double dataMax = Math.Max(Values.Max(), GoalValue ?? 0);
+        double floor = 0;
+        if (!ZeroBased && Values.Length > 0)
+        {
+            double dMin = Values.Min();
+            double dMax = Values.Max();
+            double pad = Math.Max(1, (dMax - dMin) * 0.2);
+            floor = dMin - pad;
+            dataMax = dMax + pad;
+        }
+        double range = dataMax - floor;
+        if (range <= 0) range = 1;
+        if (ZeroBased) range *= 1.15; // headroom above tallest bar
 
         float baseY = topPad + h;
         int n = Values.Length;
@@ -37,10 +48,12 @@ public class ChartDrawable : IDrawable
 
         canvas.FontSize = 9;
 
+        float Y(double v) => baseY - (float)((v - floor) / range) * h;
+
         // Goal line
         if (GoalValue is double goal && goal > 0)
         {
-            float gy = baseY - (float)(goal / max) * h;
+            float gy = Y(goal);
             canvas.StrokeColor = Color.FromArgb("#00E5A0");
             canvas.StrokeDashPattern = new float[] { 4, 4 };
             canvas.StrokeSize = 1.5f;
@@ -54,7 +67,7 @@ public class ChartDrawable : IDrawable
             for (int i = 0; i < n; i++)
             {
                 float cx = leftPad + slot * i + slot / 2;
-                float cy = baseY - (float)(Values[i] / max) * h;
+                float cy = Y(Values[i]);
                 points.Add(new PointF(cx, cy));
             }
             canvas.StrokeColor = BarColor;
@@ -71,9 +84,9 @@ public class ChartDrawable : IDrawable
             canvas.FillColor = BarColor;
             for (int i = 0; i < n; i++)
             {
-                float bh = (float)(Values[i] / max) * h;
+                float y = Y(Values[i]);
+                float bh = baseY - y;
                 float x = leftPad + slot * i + (slot - barW) / 2;
-                float y = baseY - bh;
                 if (bh > 0)
                     canvas.FillRoundedRectangle(x, y, barW, bh, 4);
 

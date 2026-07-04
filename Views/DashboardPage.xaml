@@ -11,7 +11,11 @@
     <ScrollView>
         <VerticalStackLayout Padding="16,12" Spacing="16">
 
-            <Label Text="{Binding Greeting}" Style="{StaticResource SectionTitle}" FontSize="20" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="{Binding Greeting}" Style="{StaticResource SectionTitle}" FontSize="20" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="⚙️" FontSize="20" BackgroundColor="Transparent" Padding="0" WidthRequest="44"
+                        Command="{Binding GoProfileCommand}" />
+            </Grid>
 
             <!-- Player / level card -->
             <Border Style="{StaticResource Card}" Padding="20">

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.OnboardingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
+    x:Name="Page"
+    x:DataType="vm:OnboardingViewModel"
+    Title="Välkommen"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16" Spacing="16">
+
+            <Label Text="Välkommen till FitnessQuest! 🏋️" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}" />
+            <Label Text="Berätta lite om dig så sätter vi dina dagliga mål automatiskt. Du kan ändra allt senare under Profil."
+                   Style="{StaticResource Muted}" />
+
+            <Entry Text="{Binding Name}" Placeholder="Vad heter du?" Style="{StaticResource FieldEntry}"
+                   FontSize="18" FontAttributes="Bold" />
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Vikt (kg)" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Weight}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Längd (cm)" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Height}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="2">
+                            <Label Text="Ålder" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Age}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Man" Command="{Binding SelectSexCommand}" CommandParameter="Male"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsMale}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1" Text="Kvinna" Command="{Binding SelectSexCommand}" CommandParameter="Female"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsMale}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+
+                    <Label Text="Aktivitetsnivå" Style="{StaticResource Muted}" FontSize="12" />
+                    <FlexLayout BindableLayout.ItemsSource="{Binding ActivityLevels}" Wrap="Wrap" JustifyContent="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:ActivityLevel">
+                                <Button Text="{Binding Converter={StaticResource ActivitySwedish}}" FontSize="12" Margin="0,0,6,6"
+                                        Command="{Binding BindingContext.SelectActivityCommand, Source={x:Reference Page}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="14" Padding="12,4" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <Label Text="{Binding TdeePreview}" TextColor="{StaticResource AccentGreen}" FontSize="14" FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="🚀 Kom igång" Style="{StaticResource PrimaryButton}" Command="{Binding FinishCommand}" />
+            <Button Text="Hoppa över" Command="{Binding SkipCommand}" BackgroundColor="Transparent" TextColor="{StaticResource TextMuted}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

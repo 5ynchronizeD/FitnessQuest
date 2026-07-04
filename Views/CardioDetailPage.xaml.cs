@@ -8,8 +8,8 @@ public partial class CardioDetailPage : ContentPage
 {
     private readonly CardioDetailViewModel _vm;
 
-    private readonly ChartDrawable _hr = new() { BarColor = Color.FromArgb("#FF6B6B"), IsLine = true };
-    private readonly ChartDrawable _ele = new() { BarColor = Color.FromArgb("#FFD166"), IsLine = true };
+    private readonly ChartDrawable _hr = new() { BarColor = Color.FromArgb("#FF6B6B"), IsLine = true, ZeroBased = false };
+    private readonly ChartDrawable _ele = new() { BarColor = Color.FromArgb("#FFD166"), IsLine = true, ZeroBased = false };
     private readonly ChartDrawable _paceHr = new() { BarColor = Color.FromArgb("#FF6B6B"), ShowValues = true, ValueFormat = "0" };
 
     public CardioDetailPage(CardioDetailViewModel vm)

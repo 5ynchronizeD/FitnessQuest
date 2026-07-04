@@ -26,8 +26,10 @@ public partial class GymWorkoutViewModel : BaseViewModel
     }
 
     public ObservableCollection<Workout> RecentWorkouts { get; } = new();
+    public ObservableCollection<WorkoutTemplate> Templates { get; } = new();
 
     [ObservableProperty] private bool _hasHistory;
+    [ObservableProperty] private bool _hasTemplates;
     [ObservableProperty] private int _totalWorkouts;
     [ObservableProperty] private double _volumeThisWeek;
 
@@ -45,6 +47,12 @@ public partial class GymWorkoutViewModel : BaseViewModel
 
         var weekStart = DateTime.Today.AddDays(-(((int)DateTime.Today.DayOfWeek + 6) % 7));
         VolumeThisWeek = workouts.Where(w => w.PerformedAt >= weekStart).Sum(w => w.TotalVolumeKg);
+
+        var templates = await _db.GetTemplatesAsync();
+        Templates.Clear();
+        foreach (var t in templates)
+            Templates.Add(t);
+        HasTemplates = Templates.Count > 0;
     }
 
     [RelayCommand]
@@ -68,6 +76,27 @@ public partial class GymWorkoutViewModel : BaseViewModel
             if (!ok) return;
         }
         await _db.DeleteWorkoutAsync(w.Id);
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private Task StartFromTemplate(WorkoutTemplate? t)
+    {
+        if (t is null) return Task.CompletedTask;
+        return Shell.Current.GoToAsync($"{nameof(WorkoutEditorPage)}?templateId={t.Id}");
+    }
+
+    [RelayCommand]
+    private async Task DeleteTemplate(WorkoutTemplate? t)
+    {
+        if (t is null) return;
+        var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+        if (page is not null)
+        {
+            bool ok = await page.DisplayAlert("Ta bort mall", $"Ta bort \"{t.Name}\"?", "Ta bort", "Avbryt");
+            if (!ok) return;
+        }
+        await _db.DeleteTemplateAsync(t.Id);
         await LoadAsync();
     }
 

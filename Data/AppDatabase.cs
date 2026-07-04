@@ -31,6 +31,8 @@ public class AppDatabase
         await _db.CreateTableAsync<ExerciseSet>();
         await _db.CreateTableAsync<Exercise>();
         await _db.CreateTableAsync<CardioSession>();
+        await _db.CreateTableAsync<WeightEntry>();
+        await _db.CreateTableAsync<WorkoutTemplate>();
 
         await EnsureSeedDataAsync(_db);
         return _db;
@@ -402,5 +404,80 @@ public class AppDatabase
         public double WeightKg { get; set; }
         public int Reps { get; set; }
         public DateTime PerformedAt { get; set; }
+    }
+
+    /// <summary>Best estimated 1RM ever recorded for an exercise (0 if none).</summary>
+    public async Task<double> GetBestE1RMForExerciseAsync(string exerciseName)
+    {
+        var db = await Connection();
+        var sql =
+            @"SELECT s.WeightKg, s.Reps FROM ExerciseSet s
+              JOIN WorkoutExercise we ON we.Id = s.WorkoutExerciseId
+              WHERE we.ExerciseName = ? AND s.WeightKg > 0 AND s.Reps > 0";
+        var rows = await db.QueryAsync<ProgressionRow>(sql, exerciseName);
+        return rows.Select(r => r.WeightKg * (1 + r.Reps / 30.0)).DefaultIfEmpty(0).Max();
+    }
+
+    // ---- Body weight ----------------------------------------------------
+    public async Task AddWeightAsync(WeightEntry entry)
+    {
+        var db = await Connection();
+        await db.InsertAsync(entry);
+    }
+
+    public async Task DeleteWeightAsync(WeightEntry entry)
+    {
+        var db = await Connection();
+        await db.DeleteAsync(entry);
+    }
+
+    public async Task<List<WeightEntry>> GetWeightsAsync(int take = 90)
+    {
+        var db = await Connection();
+        return await db.Table<WeightEntry>()
+            .OrderByDescending(w => w.LoggedAt)
+            .Take(take)
+            .ToListAsync();
+    }
+
+    // ---- Workout templates ----------------------------------------------
+    public async Task SaveTemplateAsync(WorkoutTemplate template)
+    {
+        var db = await Connection();
+        if (template.Id == 0)
+            await db.InsertAsync(template);
+        else
+            await db.UpdateAsync(template);
+    }
+
+    public async Task<List<WorkoutTemplate>> GetTemplatesAsync()
+    {
+        var db = await Connection();
+        return await db.Table<WorkoutTemplate>()
+            .OrderByDescending(t => t.LastUsed)
+            .ToListAsync();
+    }
+
+    public async Task<WorkoutTemplate?> GetTemplateAsync(int id)
+    {
+        var db = await Connection();
+        return await db.FindAsync<WorkoutTemplate>(id);
+    }
+
+    public async Task DeleteTemplateAsync(int id)
+    {
+        var db = await Connection();
+        await db.ExecuteAsync("DELETE FROM WorkoutTemplate WHERE Id = ?", id);
+    }
+
+    public async Task BumpTemplateUsageAsync(int id)
+    {
+        var db = await Connection();
+        var t = await GetTemplateAsync(id);
+        if (t is not null)
+        {
+            t.LastUsed = DateTime.Now;
+            await db.UpdateAsync(t);
+        }
     }
 }

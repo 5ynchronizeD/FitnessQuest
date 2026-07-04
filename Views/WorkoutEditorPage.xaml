@@ -121,6 +121,9 @@
                 <Button Text="＋ Lägg till övning" Command="{Binding AddExerciseCommand}"
                         BackgroundColor="{StaticResource AccentPrimary}" TextColor="White" CornerRadius="16" HeightRequest="52" />
 
+                <Button Text="💾 Spara som mall" Command="{Binding SaveAsTemplateCommand}" IsVisible="{Binding HasBlocks}"
+                        BackgroundColor="{StaticResource Surface}" TextColor="{StaticResource TextPrimary}" CornerRadius="14" HeightRequest="46" />
+
                 <BoxView HeightRequest="8" Color="Transparent" />
             </VerticalStackLayout>
         </ScrollView>

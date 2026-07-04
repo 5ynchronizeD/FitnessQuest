@@ -16,6 +16,7 @@
             <conv:InvertedBoolConverter x:Key="InvertedBool" />
             <conv:IsNotNullConverter x:Key="IsNotNull" />
             <conv:IsNullConverter x:Key="IsNull" />
+            <conv:ActivityLevelToSwedishConverter x:Key="ActivitySwedish" />
             <conv:BoolToColorConverter x:Key="UnlockTextColor"
                 TrueColor="{StaticResource TextPrimary}"
                 FalseColor="{StaticResource TextMuted}" />

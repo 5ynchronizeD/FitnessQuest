@@ -16,7 +16,7 @@ public partial class StatisticsPage : ContentPage
     };
     private readonly ChartDrawable _volume = new() { BarColor = Color.FromArgb("#7C4DFF"), ShowValues = false };
     private readonly ChartDrawable _cardio = new() { BarColor = Color.FromArgb("#4ECDC4"), ValueFormat = "0.#", ShowValues = false };
-    private readonly ChartDrawable _progression = new() { BarColor = Color.FromArgb("#FFC93C"), IsLine = true };
+    private readonly ChartDrawable _progression = new() { BarColor = Color.FromArgb("#FFC93C"), IsLine = true, ZeroBased = false };
 
     public StatisticsPage(StatisticsViewModel vm)
     {

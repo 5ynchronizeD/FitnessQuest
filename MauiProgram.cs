@@ -29,6 +29,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<FeedbackService>();
         builder.Services.AddSingleton<StatsService>();
         builder.Services.AddSingleton<WorkoutImportService>();
+        builder.Services.AddSingleton<INotificationService, Platforms.Android.NotificationService>();
         builder.Services.AddSingleton(_ => new OpenFoodFactsService(new HttpClient()));
 
         // ---- ViewModels ----
@@ -44,6 +45,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ExercisePickerViewModel>();
         builder.Services.AddTransient<PlateCalculatorViewModel>();
         builder.Services.AddTransient<CardioDetailViewModel>();
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<OnboardingViewModel>();
 
         // ---- Pages ----
         builder.Services.AddSingleton<DashboardPage>();
@@ -59,6 +62,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ExercisePickerPage>();
         builder.Services.AddTransient<PlateCalculatorPage>();
         builder.Services.AddTransient<CardioDetailPage>();
+        builder.Services.AddTransient<ProfilePage>();
+        builder.Services.AddTransient<OnboardingPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

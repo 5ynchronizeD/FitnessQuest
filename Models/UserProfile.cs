@@ -14,6 +14,9 @@ public class UserProfile
 
     public double WeightKg { get; set; } = 75;
     public double HeightCm { get; set; } = 178;
+    public int Age { get; set; } = 30;
+    public Sex Sex { get; set; } = Sex.Male;
+    public ActivityLevel ActivityLevel { get; set; } = ActivityLevel.Moderate;
 
     // Daily targets
     public int CalorieGoal { get; set; } = 2200;

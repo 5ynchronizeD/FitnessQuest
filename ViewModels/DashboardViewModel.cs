@@ -117,4 +117,5 @@ public partial class DashboardViewModel : BaseViewModel
     [RelayCommand] private Task GoGym() => Shell.Current.GoToAsync("//gym");
     [RelayCommand] private Task GoCardio() => Shell.Current.GoToAsync("//cardio");
     [RelayCommand] private Task GoAchievements() => Shell.Current.GoToAsync(nameof(AchievementsPage));
+    [RelayCommand] private Task GoProfile() => Shell.Current.GoToAsync(nameof(ProfilePage));
 }

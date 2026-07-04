@@ -1,4 +1,5 @@
 using System.Globalization;
+using FitnessQuest.Models;
 
 namespace FitnessQuest.Converters;
 
@@ -40,6 +41,16 @@ public class IsNullConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is string s ? string.IsNullOrWhiteSpace(s) : value is null;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>ActivityLevel → Swedish label.</summary>
+public class ActivityLevelToSwedishConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is Models.ActivityLevel a ? a.ToSwedish() : string.Empty;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();

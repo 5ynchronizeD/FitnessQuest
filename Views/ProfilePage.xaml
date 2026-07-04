@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="FitnessQuest.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:FitnessQuest.ViewModels"
+    xmlns:models="clr-namespace:FitnessQuest.Models"
+    x:Name="Page"
+    x:DataType="vm:ProfileViewModel"
+    Title="Profil &amp; mål"
+    BackgroundColor="{StaticResource AppBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="16">
+
+            <Entry Text="{Binding Name}" Placeholder="Ditt namn" Style="{StaticResource FieldEntry}"
+                   FontSize="18" FontAttributes="Bold" />
+
+            <!-- Body metrics -->
+            <Label Text="Kropp" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Vikt (kg)" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Weight}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Längd (cm)" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Height}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="2">
+                            <Label Text="Ålder" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding Age}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Man" Command="{Binding SelectSexCommand}" CommandParameter="Male"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsMale}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1" Text="Kvinna" Command="{Binding SelectSexCommand}" CommandParameter="Female"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="12">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsMale}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource AccentPrimary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+
+                    <Label Text="Aktivitetsnivå" Style="{StaticResource Muted}" FontSize="12" />
+                    <FlexLayout BindableLayout.ItemsSource="{Binding ActivityLevels}" Wrap="Wrap" JustifyContent="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:ActivityLevel">
+                                <Button Text="{Binding Converter={StaticResource ActivitySwedish}}" FontSize="12" Margin="0,0,6,6"
+                                        Command="{Binding BindingContext.SelectActivityCommand, Source={x:Reference Page}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextMuted}" CornerRadius="14" Padding="12,4" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <Label Text="{Binding TdeePreview}" TextColor="{StaticResource AccentGreen}" FontSize="13" FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Goals -->
+            <Label Text="Dagliga mål" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Kalorier (kcal)" Style="{StaticResource Muted}" FontSize="12" />
+                            <Entry Text="{Binding CalorieGoal}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Protein (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource ProteinColor}" />
+                            <Entry Text="{Binding ProteinGoal}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Kolhydrat (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource CarbsColor}" />
+                            <Entry Text="{Binding CarbsGoal}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Fett (g)" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource FatColor}" />
+                            <Entry Text="{Binding FatGoal}" Keyboard="Numeric" Style="{StaticResource FieldEntry}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Button Text="✨ Föreslå mål från TDEE" Command="{Binding SuggestGoalsCommand}"
+                            BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource TextPrimary}" CornerRadius="12" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="💾 Spara profil &amp; mål" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" />
+
+            <!-- Reminders -->
+            <Label Text="Påminnelser" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Spacing="-2" VerticalOptions="Center">
+                            <Label Text="Daglig streak-påminnelse" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" />
+                            <Label Text="{Binding ReminderLabel}" Style="{StaticResource Muted}" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding ReminderEnabled}" OnColor="{StaticResource AccentGreen}" VerticalOptions="Center" />
+                    </Grid>
+                    <HorizontalStackLayout Spacing="10" IsVisible="{Binding ReminderEnabled}">
+                        <Label Text="Tid:" Style="{StaticResource Muted}" VerticalOptions="Center" />
+                        <Button Text="−" Command="{Binding ReminderEarlierCommand}" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" WidthRequest="40" HeightRequest="40" CornerRadius="10" Padding="0" />
+                        <Label Text="{Binding ReminderHour, StringFormat='{0:00}:00'}" TextColor="{StaticResource TextPrimary}" FontAttributes="Bold" VerticalOptions="Center" WidthRequest="56" HorizontalTextAlignment="Center" />
+                        <Button Text="+" Command="{Binding ReminderLaterCommand}" BackgroundColor="{StaticResource SurfaceAlt}" TextColor="White" WidthRequest="40" HeightRequest="40" CornerRadius="10" Padding="0" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Weight diary -->
+            <Label Text="Viktdagbok" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Entry Text="{Binding NewWeight}" Placeholder="Vikt idag (kg)" Keyboard="Numeric" Style="{StaticResource FieldEntry}" />
+                        <Button Grid.Column="1" Text="Logga" Command="{Binding LogWeightCommand}"
+                                BackgroundColor="{StaticResource AccentGreen}" TextColor="{StaticResource AppBg}" FontAttributes="Bold" CornerRadius="12" WidthRequest="90" />
+                    </Grid>
+                    <Label Text="{Binding WeightTrend}" TextColor="{StaticResource AccentGreen}" FontAttributes="Bold" IsVisible="{Binding HasWeightHistory}" />
+                    <GraphicsView x:Name="WeightChart" HeightRequest="160" IsVisible="{Binding HasWeightHistory}" />
+                    <Label Text="Logga din vikt regelbundet för att se trenden." Style="{StaticResource Muted}"
+                           IsVisible="{Binding HasWeightHistory, Converter={StaticResource InvertedBool}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

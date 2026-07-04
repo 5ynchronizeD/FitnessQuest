@@ -31,6 +31,22 @@ public enum AchievementCategory
     Level
 }
 
+public enum Sex
+{
+    Male,
+    Female
+}
+
+/// <summary>Activity multiplier for TDEE (Mifflin-St Jeor).</summary>
+public enum ActivityLevel
+{
+    Sedentary,
+    Light,
+    Moderate,
+    Active,
+    VeryActive
+}
+
 public enum Equipment
 {
     Barbell,
@@ -113,4 +129,26 @@ public static class EnumExtensions
         SetType.Failure => "Till failure",
         _ => "Normalt set"
     };
+
+    public static string ToSwedish(this ActivityLevel a) => a switch
+    {
+        ActivityLevel.Sedentary => "Stillasittande",
+        ActivityLevel.Light => "Lätt aktiv",
+        ActivityLevel.Moderate => "Måttligt aktiv",
+        ActivityLevel.Active => "Aktiv",
+        ActivityLevel.VeryActive => "Mycket aktiv",
+        _ => a.ToString()
+    };
+
+    public static double Factor(this ActivityLevel a) => a switch
+    {
+        ActivityLevel.Sedentary => 1.2,
+        ActivityLevel.Light => 1.375,
+        ActivityLevel.Moderate => 1.55,
+        ActivityLevel.Active => 1.725,
+        ActivityLevel.VeryActive => 1.9,
+        _ => 1.2
+    };
+
+    public static string ToSwedish(this Sex s) => s == Sex.Male ? "Man" : "Kvinna";
 }
