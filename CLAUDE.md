@@ -2,20 +2,25 @@
 
 Gamifierad fitness-app för Android (.NET 10 MAUI). Se `README.md` för funktioner.
 
-## Release-rutin (VIKTIGT)
+## Release-rutin (VIKTIGT) — automatisk
 
-**Vid varje ny version ska följande alltid göras:**
+**Varje push till `main` skapar automatiskt en ny release** via GitHub Actions (`.github/workflows/release.yml`):
 
-1. **Bumpa versionen** i `FitnessQuest.csproj` (`ApplicationDisplayVersion` + `ApplicationVersion`). Versionen visas på startsidan.
-2. **Committa och pusha** till GitHub (`origin` = https://github.com/5ynchronizeD/FitnessQuest.git, branch `main`).
-3. **Skapa och pusha en tagg** `vX.Y` (matchande versionen). Detta triggar GitHub Actions (`.github/workflows/release.yml`) som kör tester, bygger en Release-APK och **skapar en GitHub Release automatiskt** med APK:n bifogad.
-   ```bash
-   git tag -a v1.7 -m "FitnessQuest v1.7"
-   git push origin v1.7
-   ```
-4. **Kopiera APK:n till Google Drive** (`D:`): `D:\Min enhet\FitnessQuest\FitnessQuest-<version>.apk` (lokal distribution — CI gör inte detta). Alternativt laddas APK:n ner från GitHub-releasen.
+1. Räknar ut nästa version (ökar patch från senaste taggen, t.ex. `v1.8` → `v1.8.1`).
+2. Kör enhetstester, bygger en **signerad** Release-APK (versionen sätts från taggen; `ApplicationVersion` = run-number).
+3. Skapar taggen `vX.Y.Z` och en **GitHub Release** med APK:n bifogad.
 
-> CI bygger själva releasen; det lokala bygg-kommandot nedan behövs bara för att testa/verifiera på emulator innan du taggar.
+Så det enda som behövs är att committa och pusha till `main`:
+```bash
+git push origin main   # → CI taggar, bygger, signerar och släpper automatiskt
+```
+
+- Vill du hoppa över release för en viss commit: skriv `[skip release]` i commit-meddelandet.
+- Vill du sätta en specifik version manuellt: pusha en tagg själv (`git tag -a v2.0.0 -m ...; git push origin v2.0.0`).
+- **Google Drive-kopia** (`D:\Min enhet\FitnessQuest\`) är en lokal distributionsvana — CI gör inte detta; APK:n laddas annars ner från GitHub-releasen.
+
+> Signering sker med en fast keystore lagrad som GitHub Secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Keystore-backup finns i `D:\Min enhet\FitnessQuest\keystore\`. Tappas den kan appen aldrig uppdateras.
+> Det lokala bygg-kommandot nedan behövs bara för att verifiera på emulator innan push.
 
 ## Bygg-kommando
 
